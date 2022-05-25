@@ -23,7 +23,10 @@ const run = async () => {
     const productCollection = client
       .db("assignment-12")
       .collection("allProducts");
+    const commentCollection = client.db("assignment-12").collection("comment");
 
+    // all product
+    // http://localhost:5000/products
     app.get("/products", async (req, res) => {
       const query = {};
       const cursor = await productCollection.find(query).toArray();
@@ -33,6 +36,19 @@ const run = async () => {
     app.post("/products", async (req, res) => {
       const data = req.body;
       const result = await productCollection.insertOne(data);
+      res.send(result);
+    });
+
+    // user comment
+    app.get("/comment", async (req, res) => {
+      const query = {};
+      const cursor = await commentCollection.find(query).toArray();
+      res.send(cursor);
+    });
+
+    app.post("/comment", async (req, res) => {
+      const data = req.body;
+      const result = await commentCollection.insertOne(data);
       res.send(result);
     });
     console.log("connect");
