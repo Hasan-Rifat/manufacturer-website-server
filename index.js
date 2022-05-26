@@ -4,7 +4,7 @@ const cors = require("cors");
 const jwt = require("jsonwebtoken");
 const app = express();
 const port = process.env.PORT || 5000;
-const { MongoClient, ServerApiVersion } = require("mongodb");
+const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const { get } = require("express/lib/response");
 
 app.use(cors());
@@ -24,12 +24,19 @@ const run = async () => {
       .db("assignment-12")
       .collection("allProducts");
     const reviewCollection = client.db("assignment-12").collection("review");
+    const orderCollection = client.db("assignment-12").collection("order");
 
     // all product
     // http://localhost:5000/products
     app.get("/products", async (req, res) => {
-      const query = {};
-      const cursor = await productCollection.find(query).toArray();
+      const cursor = await productCollection.find({}).toArray();
+      res.send(cursor);
+    });
+
+    app.get("/products/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: ObjectId(id) };
+      const cursor = await productCollection.findOne(query);
       res.send(cursor);
     });
 
@@ -52,6 +59,29 @@ const run = async () => {
       const result = await reviewCollection.insertOne(data);
       res.send(result);
     });
+
+    // placeOrder
+    // http://localhost:5000/order
+    app.get("/order", async (req, res) => {
+      const cursor = await orderCollection.find({}).toArray();
+      res.send(cursor);
+    });
+
+    app.post("/order", async (req, res) => {
+      const data = req.body;
+      const result = await orderCollection.insertOne(data);
+      res.send(result);
+    });
+
+    // my order
+    // http://localhost:5000/orders?email=
+    app.get("/orders", async (req, res) => {
+      const email = req.query.email;
+      const query = { email: email };
+      const cursor = await orderCollection.find(query).toArray();
+      res.send(cursor);
+    });
+
     console.log("connect");
   } finally {
   }
